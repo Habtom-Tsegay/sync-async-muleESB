@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="7e8af08b-199a-490c-9df5-95d86be763d3" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="4a832c18-a4b9-4510-b88b-4dc366f46cc0" >
+	</file:config>
+	<flow name="async-scope-flow1" doc:id="4d1f6791-b42d-4bce-918f-805fcd338ebc" >
+		<http:listener doc:name="Listener" doc:id="196da832-c5d4-419f-b7a7-8a6515a8a519" path="asyncMainFlow" config-ref="HTTP_Listener_config" allowedMethods="GET"/>
+		<set-variable value="#[now()]" doc:name="flow start time" doc:id="eae21d20-d752-466f-ab5b-a385d3054bcf" variableName="startTime"/>
+		<async doc:name="Async" doc:id="16d4227a-89c4-4d37-89cf-727f192ce5d7" >
+			<http:request method="GET" doc:name="Get CSV" doc:id="c27eb78a-dc18-406b-b244-6fa6fff2b3c5" url="https://opendata.maryland.gov/api/views/mhft-5t5y/rows.csv?accessType=DOWNLOAD" outputMimeType="application/csv"/>
+			<file:write doc:name="to CSV" doc:id="61f3360f-ebc2-4d5c-b6c0-e126bb11a959" path="D:\My docs\Mulesoft class\Mule Fissh\data\sync-async-scope\async-main-flow-vehicle-crashes.csv"/>
+			<logger level="INFO" doc:name="Logger" doc:id="2c4f4732-8ce7-47c2-aaf4-68b03eed4bc0" message="data successfully written!"/>
+		</async>
+		<set-payload value='#["Time flow took: " ++ now() - vars.startTime]' doc:name="total time taken" doc:id="cbd993f9-3108-4c60-b081-be6996be9cab" />
+	</flow>
+	<flow name="sync-scope-flow1" doc:id="6e2b477a-8e55-4b90-8482-5696791b940c" >
+		<http:listener doc:name="Listener" doc:id="46149d74-bcd8-42b6-9429-becc8b886511" path="syncMainFlow" config-ref="HTTP_Listener_config"/>
+		<set-variable value="#[now()]" doc:name="flow start time" doc:id="0c06d04c-5e05-4f97-b4f4-a3b9e18ba2b1" variableName="startTime"/>
+		<http:request method="GET" doc:name="Get CSV" doc:id="01b0249e-67b2-47b8-aa96-b026ac91d75e" url="https://opendata.maryland.gov/api/views/mhft-5t5y/rows.csv?accessType=DOWNLOAD" outputMimeType="application/csv"/>
+		<file:write doc:name="to CSV" doc:id="ab52b97c-b2d2-4a9b-b8f9-f19f8790590d" path="D:\My docs\Mulesoft class\Mule Fissh\data\sync-async-scope\async-main-flow-vehicle-crashes.csv"/>
+		<logger level="INFO" doc:name="Logger" doc:id="c5525132-2062-497f-a886-61500dc91497" message="data successfully written!"/>
+		<set-payload value='#["Time flow took: " ++ now() - vars.startTime]' doc:name="total time taken" doc:id="4edc4f12-8b51-41b4-89c8-da0ace3ab3d5" />
+	</flow>
+</mule>
